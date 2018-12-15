@@ -41,14 +41,14 @@ class Youtube extends Component {
          });
   }
 
-  openVideo() {
-    return window.location.href = '/youtube/' + this;
+  openVideo(videoId) {
+    return window.open('//www.youtube.com/watch?v=' + videoId);
   }
 
   youtubeCard() {
     return this.state.trends.map((videos, index) =>
       <div key={index} className="card-container">
-        <div className="card" onClick={this.openVideo.bind(videos.id)}>
+        <div className="card" onClick={this.openVideo.bind(this, [videos.id])}>
           <div className="img-container">
             <img src={videos.thumbnail} alt={videos.title}/>
             <MovieIcon/>
