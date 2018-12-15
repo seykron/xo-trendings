@@ -46,29 +46,29 @@ class Youtube extends Component {
   }
 
   youtubeCard() {
-    return this.state.trends.map((videos, index) =>
+    return this.state.trends.map((video, index) =>
       <div key={index} className="card-container">
-        <div className="card" onClick={this.openVideo.bind(this, [videos.id])}>
+        <div className="card" onClick={this.openVideo.bind(this, [video.id])}>
           <div className="img-container">
-            <img src={videos.thumbnail} alt={videos.title}/>
+            <img src={video.thumbnail} alt={video.title}/>
             <MovieIcon/>
           </div>
           <div className="video-statistic">
             <div className="publishedAt">
               <AvTimerIcon/>
-              <span>{videos.publishedAt}</span>
+              <span>{video.publishedAt}</span>
             </div>
             <div className="viewCount">
               <VisibilityIcon/>
-              <span>{videos.viewCount}</span>
+              <span>{video.viewCount}</span>
             </div>
             <div className="likeCount">
               <FavoriteIcon/>
-              <span>{videos.likeCount}</span>
+              <span>{video.likeCount}</span>
             </div>
           </div>
           <p className="video-title text-ellipsis">
-            {videos.title}
+            {video.title}
           </p>
         </div>
       </div>
