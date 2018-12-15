@@ -8,10 +8,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import WarningIcon from '@material-ui/icons/Warning';
 import PropTypes from 'prop-types';
 
-import { YoutubeService } from '../../services/youtube/Youtube';
 import './Youtube.scss';
-
-const service = new YoutubeService();
 
 class Youtube extends Component {
   constructor(props) {
@@ -20,6 +17,7 @@ class Youtube extends Component {
       trends: [],
       isError: false
     };
+    this.youtubeService = this.props.services.youtubeService;
   }
 
   componentWillMount() {
@@ -28,7 +26,7 @@ class Youtube extends Component {
   }
 
   async loadVideos() {
-    Axios.all(await service.getTrendingVideos(this.props.config.maxVideosToLoad))
+    Axios.all(await this.youtubeService.getTrendingVideos(this.props.config.maxVideosToLoad))
          .then((data) => {
            this.setState({
              trends: data,

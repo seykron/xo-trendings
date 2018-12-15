@@ -45,7 +45,7 @@ class Header extends Component {
           anchor="right"
           open={this.state.drawerIsOpened}
           onClose={this.toggleDrawer.bind(this, false)}>
-            <SlideFilters close={this.toggleDrawer.bind(this, false)} config={this.props.config} onChanges={this.props.onChanges}/>
+            <SlideFilters services={this.props.services} close={this.toggleDrawer.bind(this, false)} config={this.props.config} onChanges={this.props.onChanges}/>
         </Drawer>
       </div>
     );
@@ -55,7 +55,8 @@ class Header extends Component {
 Header.propTypes = {
   setTitle: PropTypes.func,
   config: PropTypes.object,
-  onChanges: PropTypes.func
+  onChanges: PropTypes.func,
+  services : PropTypes.object
 };
 
 export default Header;

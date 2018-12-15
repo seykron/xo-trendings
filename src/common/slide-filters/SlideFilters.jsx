@@ -13,7 +13,6 @@ import Slider from 'rc-slider';
 
 import './SlideFilters.scss';
 import { appConfig } from '../../config';
-import { YoutubeService } from '../../services/youtube/Youtube';
 
 const countryList = appConfig.countryList;
 const Handle = Slider.Handle;
@@ -79,11 +78,11 @@ renderSuggestion.propTypes = {
   suggestion      : PropTypes.shape({name: PropTypes.string}).isRequired
 };
 
-const youtubeService = new YoutubeService();
-
 class SlideFilters extends Component {
   constructor(props) {
     super(props);
+
+    this.youtubeService = this.props.services.youtubeService;
   }
 
   close() {
@@ -96,7 +95,7 @@ class SlideFilters extends Component {
 
   async componentDidMount() {
     this.setState({
-      categories: await youtubeService.listCategories()
+      categories: await this.youtubeService.listCategories()
     });
   }
 
@@ -218,7 +217,8 @@ class SlideFilters extends Component {
 SlideFilters.propTypes = {
   config   : PropTypes.object,
   onChanges: PropTypes.func,
-  close    : PropTypes.func
+  close    : PropTypes.func,
+  services : PropTypes.object
 };
 
 export default SlideFilters;
