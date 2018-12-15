@@ -87,6 +87,14 @@ renderSuggestion.propTypes = {
 
 
 class SlideFilters extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  close() {
+    this.props.close();
+  }
+
   render() {
     const videosToLoadChange = (val) => {
       this.props.config.maxVideosToLoad = val;
@@ -97,7 +105,7 @@ class SlideFilters extends Component {
         <h3 className="title">
           Filters
           <Button className="mat-icon-button">
-            <CloseIcon aria-label="Close"/>
+            <CloseIcon aria-label="Close" onClick={this.close.bind(this)} />
           </Button>
         </h3>
         <Downshift id="countrySelect">
@@ -186,7 +194,8 @@ class SlideFilters extends Component {
 
 SlideFilters.propTypes = {
   config   : PropTypes.object,
-  onChanges: PropTypes.func
+  onChanges: PropTypes.func,
+  close    : PropTypes.func
 };
 
 export default SlideFilters;

@@ -17,3 +17,14 @@ it('renders without crashing', () => {
   ReactDOM.render(<SlideFilters config={config} onChanges={onChanges}/>, div);
   ReactDOM.unmountComponentAtNode(div);
 });
+
+it('closes properly', () => {
+  const div = document.createElement('div');
+  const close = jest.fn();
+  const slideFilters = ReactDOM.render(<SlideFilters close={close} config={config} onChanges={onChanges}/>, div);
+
+  slideFilters.close();
+  expect(close).toBeCalled();
+
+  ReactDOM.unmountComponentAtNode(div);
+});

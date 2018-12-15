@@ -21,11 +21,11 @@ class Header extends Component {
     }, 100);
   }
 
-  toggleDrawer = (open) => () => {
+  toggleDrawer(open) {
     this.setState({
       drawerIsOpened: open
     });
-  };
+  }
 
   render() {
     return (
@@ -37,15 +37,15 @@ class Header extends Component {
           <div className="opened-module-title">
             {this.state.title}
           </div>
-          <Button className="menu-toggle" onClick={this.toggleDrawer()}>
+          <Button className="menu-toggle" onClick={this.toggleDrawer.bind(this, true)}>
             <SettingsIcon aria-label="Settings"/>
           </Button>
         </nav>
         <Drawer
           anchor="right"
           open={this.state.drawerIsOpened}
-          onClose={this.toggleDrawer(false)}>
-            <SlideFilters config={this.props.config} onChanges={this.props.onChanges}/>
+          onClose={this.toggleDrawer.bind(this, false)}>
+            <SlideFilters close={this.toggleDrawer.bind(this, false)} config={this.props.config} onChanges={this.props.onChanges}/>
         </Drawer>
       </div>
     );
