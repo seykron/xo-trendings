@@ -1,21 +1,23 @@
 import Axios from 'axios';
 import {appConfig} from '../../config';
 import {VideoClass} from '../../models/video.class';
+import {CategoryClass} from '../../models/category.class';
 import { isNullOrUndefined } from 'util';
 
-const axios = Axios.create({
-  baseURL: appConfig.getYoutubeEndPoint('videos')
+const youtubeClient = Axios.create({
+  baseURL: appConfig.youtubeEndPoint
 });
 
 const MAX_VIDEOS_PER_PAGE = 50;
+const CATEGORIES_PART = 'snippet';
 
 function createListParams(videosPerPage = appConfig.maxVideosToLoad,
                           pageToken) {
   return {
     part: appConfig.partsToLoad,
     chart: appConfig.chart,
-    videoCategoryId: appConfig.defaultCategoryId,
-    regionCode: appConfig.defaultRegion,
+    videoCategoryId: appConfig.currentCategoryId || appConfig.defaultCategoryId,
+    regionCode: appConfig.currentRegion || appConfig.defaultRegion,
     maxResults: videosPerPage < MAX_VIDEOS_PER_PAGE ? videosPerPage : MAX_VIDEOS_PER_PAGE,
     key: appConfig.youtubeApiKey,
     pageToken: pageToken
@@ -32,7 +34,7 @@ function createListParams(videosPerPage = appConfig.maxVideosToLoad,
  */
 async function fetchVideosPage(videosPerPage = appConfig.maxVideosToLoad, pageToken, videos = []) {
   const params = createListParams(videosPerPage, pageToken);
-  const result = await axios.get('/', {params});
+  const result = await youtubeClient.get('/videos', {params});
   const nextPageToken = result.data.nextPageToken;
   const nextVideos = videos.concat(
     result.data.items
@@ -54,5 +56,20 @@ async function fetchVideosPage(videosPerPage = appConfig.maxVideosToLoad, pageTo
 export class YoutubeService {
   async getTrendingVideos(videosPerPage = appConfig.maxVideosToLoad) {
     return await fetchVideosPage(videosPerPage);
+  }
+
+  /** Lists all videos categories for the current region.
+   * @returns a promise to receive the list of {{CategoryClass}}es.
+   */
+  async listCategories() {
+    const params = {
+      part: CATEGORIES_PART,
+      regionCode: appConfig.currentRegion || appConfig.defaultRegion,
+      key: appConfig.youtubeApiKey
+    };
+    const categoriesResult = await youtubeClient.get('/videoCategories', {params});
+    
+    return categoriesResult.data.items
+        .map(jsonCategory => new CategoryClass(jsonCategory));
   }
 }

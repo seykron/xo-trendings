@@ -13,15 +13,9 @@ import Slider from 'rc-slider';
 
 import './SlideFilters.scss';
 import { appConfig } from '../../config';
+import { YoutubeService } from '../../services/youtube/Youtube';
 
 const countryList = appConfig.countryList;
-const categoriesList = [
-  {name: 'Film & Animation', id: 1},
-  {name: 'Autos & Vehicles', id: 2},
-  {name: 'Music', id: 10},
-  {name: 'Pets & Animals', id: 4}
-];
-
 const Handle = Slider.Handle;
 
 const handle = (props) => {
@@ -85,6 +79,7 @@ renderSuggestion.propTypes = {
   suggestion      : PropTypes.shape({name: PropTypes.string}).isRequired
 };
 
+const youtubeService = new YoutubeService();
 
 class SlideFilters extends Component {
   constructor(props) {
@@ -95,20 +90,45 @@ class SlideFilters extends Component {
     this.props.close();
   }
 
+  filterAndUpdate() {
+    this.props.onChanges();
+  }
+
+  async componentDidMount() {
+    this.setState({
+      categories: await youtubeService.listCategories()
+    });
+  }
+
   render() {
     const videosToLoadChange = (val) => {
       this.props.config.maxVideosToLoad = val;
-      this.props.onChanges();
+      this.filterAndUpdate();
     };
+    const updateRegion = countryName => {
+      const region = countryList.find(country =>
+        country.name === countryName
+      );
+      this.props.config.currentRegion = region.code;
+      this.filterAndUpdate();
+    };
+    const updateCategory = categoryName => {
+      const resolvedCategory = this.state.categories.find(category =>
+        category.name === categoryName
+      );
+      this.props.config.currentCategoryId = resolvedCategory.id;
+      this.filterAndUpdate();
+    };
+
     return (
       <div className="slide-filters-container">
         <h3 className="title">
           Filters
           <Button className="mat-icon-button">
-            <CloseIcon aria-label="Close" onClick={this.close.bind(this)} />
+            <CloseIcon aria-label="Close" onClick={ () => this.close() } />
           </Button>
         </h3>
-        <Downshift id="countrySelect">
+        <Downshift id="countrySelect" onChange={ regionCode => updateRegion(regionCode) }>
           {({
               getInputProps,
               getItemProps,
@@ -142,14 +162,15 @@ class SlideFilters extends Component {
           )}
         </Downshift>
         <div className="divider"/>
-        <Downshift id="categorySelect">
+        <Downshift id="categorySelect" onChange={ category => updateCategory(category) }>
           {({
               getInputProps,
               getItemProps,
               getMenuProps,
               highlightedIndex,
               isOpen,
-              selectedItem
+              selectedItem,
+              clearItems
             }) => (
             <div>
               {renderInput({
@@ -160,15 +181,17 @@ class SlideFilters extends Component {
               <div {...getMenuProps()}>
                 {isOpen ? (
                   <Paper square>
-                    {categoriesList.map((suggestion, index) =>
-                      renderSuggestion({
-                        suggestion,
-                        index,
-                        itemProps: getItemProps({item: suggestion.name}),
-                        highlightedIndex,
-                        selectedItem
-                      })
-                    )}
+                    { 
+                      this.state.categories.map((suggestion, index) =>
+                        renderSuggestion({
+                          suggestion,
+                          index,
+                          itemProps: getItemProps({item: suggestion.name}),
+                          highlightedIndex,
+                          selectedItem
+                        })
+                      )
+                    }
                   </Paper>
                 ) : null}
               </div>
