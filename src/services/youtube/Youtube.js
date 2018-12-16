@@ -24,38 +24,59 @@ function createListParams(videosPerPage = appConfig.maxVideosToLoad,
   };
 }
 
-/** Gets most popular videos from the Youtube data API.
- * 
+/** Gets a single page of most popular videos from the Youtube data API.
+ *
  * @param {Number} videosPerPage Number of videos per page.
- * @param {String} [pageToken] A page token to fetch the next page, used for pagination, should 
+ * @param {String} [pageToken] A page token to fetch the next page, used for pagination, should
  * not be used from outside this function.
- * @param {VideoClass[]} [videos] List of already resolved videos. Used for pagination, should
- * not be used outside this function.
  */
-async function fetchVideosPage(videosPerPage = appConfig.maxVideosToLoad, pageToken, videos = []) {
+async function fetchVideosPage(videosPerPage = appConfig.maxVideosToLoad, pageToken) {
   const params = createListParams(videosPerPage, pageToken);
   const result = await youtubeClient.get('/videos', {params});
   const nextPageToken = result.data.nextPageToken;
-  const nextVideos = videos.concat(
-    result.data.items
-      .map(item => new VideoClass(item))
-      .filter(item => item.id !== '')
-  );
+  return {
+    videos: result.data.items.map(item =>
+      new VideoClass(item)
+    ),
+    nextPageToken: nextPageToken
+  };
+}
 
-  if (nextVideos.length < videosPerPage && !isNullOrUndefined(nextPageToken)) {
-    return await fetchVideosPage(
-      videosPerPage,
-      nextPageToken,
-      nextVideos
+/** Gets most popular videos from the Youtube data API.
+ *
+ * @param {Number} videosPerPage Number of videos per page.
+ * @param {Object} [previousPage] Previous page.
+ * @param {String} videosPage.nextPageToken A page token to fetch the next page, used for pagination, should
+ * not be used from outside this function.
+ * @param {VideoClass[]} videosPage.videos List of already resolved videos. Used for pagination, should
+ * not be used outside this function.
+ */
+async function fetchVideos(videosPerPage = appConfig.maxVideosToLoad, previousPage) {
+  const nextPage = await fetchVideosPage(videosPerPage, previousPage && previousPage.nextPageToken);
+  const nextVideos = ((previousPage && previousPage.videos) || []).concat(nextPage.videos);
+
+  if (nextVideos.length < videosPerPage && !isNullOrUndefined(nextPage.nextPageToken)) {
+    return await fetchVideos(
+      videosPerPage, {
+        videos: nextVideos,
+        nextPageToken: nextPage.nextPageToken
+      }
     );
   } else {
-    return nextVideos.slice(0, videosPerPage);
+    return {
+      videos: nextVideos.slice(0, videosPerPage),
+      nextPageToken: nextPage.nextPageToken
+    };
   }
 }
 
 export class YoutubeService {
+  async fetchNextPage(videosPerPage = appConfig.maxVideosToLoad, nextPageToken) {
+    return await fetchVideosPage(videosPerPage, nextPageToken);
+  }
+
   async getTrendingVideos(videosPerPage = appConfig.maxVideosToLoad) {
-    return await fetchVideosPage(videosPerPage);
+    return await fetchVideos(videosPerPage);
   }
 
   /** Lists all videos categories for the current region.
@@ -68,7 +89,7 @@ export class YoutubeService {
       key: appConfig.youtubeApiKey
     };
     const categoriesResult = await youtubeClient.get('/videoCategories', {params});
-    
+
     return categoriesResult.data.items
         .map(jsonCategory => new CategoryClass(jsonCategory));
   }

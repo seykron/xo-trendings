@@ -2,6 +2,13 @@ export class MockYoutubeService {
 
   mock = {}
 
+  fetchNextPage(returnValue) {
+    this.mock.fetchNextPage = () => new Promise((resolve, reject) =>
+      resolve(returnValue)
+    );
+    return this;
+  }
+
   getTrendingVideos(videosPerPage = appConfig.maxVideosToLoad, returnValue) {
     this.mock.getTrendingVideos = () => new Promise((resolve, reject) =>
       resolve(returnValue)

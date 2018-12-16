@@ -20,9 +20,7 @@ const setTitle = (title) => {
   return titleStore;
 };
 const services = {
-  youtubeService: new MockYoutubeService()
-    .listCategories([])
-    .mock
+  youtubeService: new MockYoutubeService().mock
 };
 
 it('renders without crashing', () => {
@@ -38,5 +36,28 @@ it('opens video in new window', () => {
   const youtube = ReactDOM.render(<Youtube services={services} config={config} onChanges={onChanges} setTitle={setTitle} />, div);
   youtube.openVideo("video-id");
   expect(global.open).toBeCalledWith("//www.youtube.com/watch?v=video-id");
+  ReactDOM.unmountComponentAtNode(div);
+});
+
+it('scrolls and loads next page', async () => {
+  const div = document.createElement('div');
+  const video = {};
+  const nextPage = {
+    videos: [video],
+    nextPageToken: "bar"
+  };
+  const services = {
+    youtubeService: new MockYoutubeService()
+    .fetchNextPage(nextPage)
+    .mock
+  };
+  const youtube = ReactDOM.render(<Youtube services={services} config={config} onChanges={onChanges} setTitle={setTitle} />, div);
+  youtube.isBottom = () => true;
+  youtube.setState({nextPageToken: "foo"});
+
+  await youtube.loadNextPageIfRequired();
+
+  expect(youtube.state.nextPageToken).toBe('bar');
+  expect(youtube.state.trends[0]).toBe(video);
   ReactDOM.unmountComponentAtNode(div);
 });

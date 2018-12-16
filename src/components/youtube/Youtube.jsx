@@ -20,23 +20,68 @@ class Youtube extends Component {
     this.youtubeService = this.props.services.youtubeService;
   }
 
+  componentDidMount() {
+    document.addEventListener('scroll', this.loadNextPageIfRequired.bind(this));
+  }
+
   componentWillMount() {
     this.props.setTitle('YOUTUBE');
     this.props.onChanges(() => this.loadVideos());
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('scroll', this.loadNextPageIfRequired.bind(this));
+  }
+
+  isBottom() {
+    const rootElement = document.getElementById('root');
+    return rootElement.getBoundingClientRect().bottom <= window.innerHeight;
+  }
+
+  /** Loads the next videos page if the user reached the bottom of the page.
+   *
+   * This function does not load the remaining videos from the previous page, it
+   * only loads the next page, so it is possible to miss some videos depending on
+   * the maxVideosToLoad value but it's good enough to display a list of
+   * recommendations.
+   */
+  async loadNextPageIfRequired() {
+    if (this.isBottom() && this.state.nextPageToken && !this.state.loading) {
+      try {
+        this.setState({
+          loading: true
+        });
+        const currentVideos = this.state.trends;
+        const nextPage = await this.youtubeService.fetchNextPage(
+          this.props.config.maxVideosToLoad,
+          this.state.nextPageToken
+        );
+        this.setState({
+          trends: currentVideos.concat(nextPage.videos),
+          nextPageToken: nextPage.nextPageToken,
+          loading: false,
+          isError: false
+        });
+      } catch (cause) {
+        this.setState({
+          trends: [],
+          isError: true
+        });
+      }
+    }
+  }
+
   async loadVideos() {
-    Axios.all(await this.youtubeService.getTrendingVideos(this.props.config.maxVideosToLoad))
-         .then((data) => {
-           this.setState({
-             trends: data,
-             isError: false
-           });
-         })
-         .catch((err) => {
-           this.setState({isError: true});
-           console.log(err);
-         });
+    try {
+      const page = await this.youtubeService.getTrendingVideos(this.props.config.maxVideosToLoad);
+      this.setState({
+        trends: page.videos,
+        nextPageToken: page.nextPageToken,
+        isError: false
+      });
+    } catch (cause) {
+      this.setState({isError: true});
+    }
   }
 
   openVideo(videoId) {
