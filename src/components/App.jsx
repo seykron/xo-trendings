@@ -6,14 +6,27 @@ import Youtube from './youtube/Youtube';
 import YoutubePlayer from './youtube/player/Youtube.Player';
 import { appConfig } from '../config';
 import { YoutubeService } from '../services/youtube/Youtube';
+import { isNullOrUndefined } from 'util';
 
-const config = appConfig;
+let config;
+
+try {
+  const storedConfig = localStorage.getItem('appConfig');
+  config = Object.assign(appConfig, (!isNullOrUndefined(storedConfig) && JSON.parse(storedConfig)) || {});
+} catch(cause) {
+  config = appConfig;
+}
+
 let store;
 const onChanges = (fn) => {
   if (fn) {
     store = fn;
   }
-
+  localStorage.setItem('appConfig', JSON.stringify({
+    maxVideosToLoad: config.maxVideosToLoad,
+    currentRegion: config.currentRegion,
+    currentCategoryId: config.currentCategoryId
+  }));
   store();
 };
 let titleStore = '';

@@ -94,8 +94,15 @@ class SlideFilters extends Component {
   }
 
   async componentDidMount() {
+    const newCategories = await this.youtubeService.listCategories();
     this.setState({
-      categories: await this.youtubeService.listCategories()
+      categories: newCategories,
+      currentCategory: newCategories.find(category =>
+        category.id === this.props.config.currentCategoryId
+      ),
+      currentRegion: countryList.find(country =>
+        country.code === this.props.config.currentRegion
+      )
     });
   }
 
@@ -127,7 +134,7 @@ class SlideFilters extends Component {
             <CloseIcon aria-label="Close" onClick={ () => this.close() } />
           </Button>
         </h3>
-        <Downshift id="countrySelect" onChange={ regionCode => updateRegion(regionCode) }>
+        <Downshift id="countrySelect" selectedItem={this.state && this.state.currentRegion && this.state.currentRegion.name} onChange={ regionCode => updateRegion(regionCode) }>
           {({
               getInputProps,
               getItemProps,
@@ -161,7 +168,7 @@ class SlideFilters extends Component {
           )}
         </Downshift>
         <div className="divider"/>
-        <Downshift id="categorySelect" onChange={ category => updateCategory(category) }>
+        <Downshift id="categorySelect" selectedItem={this.state && this.state.currentCategory && this.state.currentCategory.name} onChange={ category => updateCategory(category) }>
           {({
               getInputProps,
               getItemProps,
