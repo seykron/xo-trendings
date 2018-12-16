@@ -93,16 +93,19 @@ class SlideFilters extends Component {
     this.props.onChanges();
   }
 
-  async componentDidMount() {
-    const newCategories = await this.youtubeService.listCategories();
-    this.setState({
-      categories: newCategories,
-      currentCategory: newCategories.find(category =>
-        category.id === this.props.config.currentCategoryId
-      ),
-      currentRegion: countryList.find(country =>
-        country.code === this.props.config.currentRegion
-      )
+  componentDidMount() {
+    this.youtubeService.listCategories().then(newCategories => {
+      this.setState({
+        categories: newCategories,
+        currentCategory: newCategories.find(category =>
+          category.id === this.props.config.currentCategoryId
+        ),
+        currentRegion: countryList.find(country =>
+          country.code === this.props.config.currentRegion
+        )
+      });  
+    }).catch(error => {
+      throw new Error('Error retrieving categories from Youtube Data API.');
     });
   }
 
@@ -188,7 +191,7 @@ class SlideFilters extends Component {
                 {isOpen ? (
                   <Paper square>
                     { 
-                      this.state.categories.map((suggestion, index) =>
+                      clearItems() || this.state.categories.map((suggestion, index) =>
                         renderSuggestion({
                           suggestion,
                           index,

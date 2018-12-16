@@ -29,4 +29,6 @@ it('Opens slide filters properly', () => {
   expect(header.state.drawerIsOpened).toBe(true);
   header.toggleDrawer(false);
   expect(header.state.drawerIsOpened).toBe(false);
+
+  ReactDOM.unmountComponentAtNode(div);
 });

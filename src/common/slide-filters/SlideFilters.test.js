@@ -33,6 +33,7 @@ it('renders without crashing', () => {
     config={config} 
     onChanges={onChanges}
   />, div);
+  ReactDOM.unmountComponentAtNode(div);
 });
 
 it('closes properly', () => {
@@ -47,6 +48,7 @@ it('closes properly', () => {
 
   slideFilters.close();
   expect(close).toBeCalled();
+  ReactDOM.unmountComponentAtNode(div);
 });
 
 it('loads categories from YoutubeService', () => {
@@ -61,10 +63,10 @@ it('loads categories from YoutubeService', () => {
     onChanges={onChanges}
   />, div);
 
-  services.youtubeService.verify();
+  ReactDOM.unmountComponentAtNode(div);
 });
 
-it('restores previous state', () => {
+it('restores previous state', async () => {
   const div = document.createElement('div');
   const filtersConfig = Object.assign({
     currentCategoryId: 1,
@@ -81,10 +83,10 @@ it('restores previous state', () => {
     onChanges={onChanges}
   />, div);
 
-  setImmediate(() => {
-    expect(slideFilters.state.currentCategory).toBe(categories[0]);
-    expect(slideFilters.state.currentRegion).toBe(appConfig.countryList[0]);
-  
-    services.youtubeService.verify();  
-  });
+  await slideFilters.componentDidMount();
+
+  expect(slideFilters.state.currentCategory).toBe(categories[0]);
+  expect(slideFilters.state.currentRegion).toBe(appConfig.countryList[0]);
+
+  ReactDOM.unmountComponentAtNode(div);
 });

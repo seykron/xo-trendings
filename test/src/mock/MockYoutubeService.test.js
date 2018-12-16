@@ -1,15 +1,21 @@
-import { Mock } from "./Mock.test";
+export class MockYoutubeService {
 
-export class MockYoutubeService extends Mock {
+  mock = {}
 
   getTrendingVideos(videosPerPage = appConfig.maxVideosToLoad, returnValue) {
-    return this.invoke("getTrendingVideos", returnValue, [videosPerPage]);
+    this.mock.getTrendingVideos = () => new Promise((resolve, reject) =>
+      resolve(returnValue)
+    );
+    return this;
   }
 
   /** Lists all videos categories for the current region.
    * @returns a promise to receive the list of {{CategoryClass}}es.
    */
   listCategories(returnValue) {
-    return this.invoke("listCategories", returnValue);
+    this.mock.listCategories = () => new Promise((resolve, reject) =>
+      resolve(returnValue)
+    );
+    return this;
   }
 }
