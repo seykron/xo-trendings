@@ -56,7 +56,9 @@ class App extends Component {
                 onChanges={onChanges} 
                 setTitle={setTitle}/>}
               />
-            <Route exact path="/youtube/:videoId" component={YoutubePlayer}/>
+            <Route exact path="/youtube/:videoId" render={ () =>
+              <YoutubePlayer services={services} />
+            }/>
           </Switch>
         </div>
       </Router>

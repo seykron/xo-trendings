@@ -1,26 +1,43 @@
 import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import './Youtube.Player.scss';
 
 class YoutubePlayer extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.youtubeService = this.props.services.youtubeService;
     const id = window.location.href
       .replace(/^.*\//g, '')
       .replace(/^.*\..*/g, '');
-    const iframe = '<iframe title="Video"' +
-      '        width="100%"' +
-      '        height="100%"' +
-      '        src=https://www.youtube.com/embed/'+id+'?autoplay=1'+
-      '        frameBorder="0"'+
-      '        allowFullScreen/>';
-    setTimeout(() => {
-      if (document.getElementsByClassName('frame-block')[0]) {
-        document.getElementsByClassName('frame-block')[0].innerHTML = iframe;
-      }
-    }, 1000);
 
+    this.state = {
+      videoId: id
+    };
+  }
+
+  componentDidMount() {
+    const videoId = this.state.videoId;
+
+    this.youtubeService.isValidVideo(this.state.videoId).then(
+      isValidId => {
+
+        if (isValidId) {
+          const iframe = '<iframe title="Video"' +
+            '        width="100%"' +
+            '        height="100%"' +
+            '        src=https://www.youtube.com/embed/'+videoId+'?autoplay=1'+
+            '        frameBorder="0"'+
+            '        allowFullScreen/>';
+          setTimeout(() => {
+            if (document.getElementsByClassName('frame-block')[0]) {
+              document.getElementsByClassName('frame-block')[0].innerHTML = iframe;
+            }
+          }, 1000);  
+        } else {
+          window.location.replace('/youtube');
+        }
+      });
   }
 
   render() {
@@ -33,5 +50,9 @@ class YoutubePlayer extends Component {
       </div>);
   }
 }
+
+YoutubePlayer.propTypes = {
+  services : PropTypes.object
+};
 
 export default YoutubePlayer;

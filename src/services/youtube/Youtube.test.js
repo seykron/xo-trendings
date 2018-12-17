@@ -37,3 +37,12 @@ it('listCategories should list videos categories properly', async () => {
     expect(!isNullOrUndefined(category.name)).toBeTruthy();
   }
 });
+
+it('must validate valid video id', async () => {
+  const service = new YoutubeService();
+  const validResult = await service.isValidVideo('3Lw-QrjBa60');
+  const invalidResult = await service.isValidVideo('foo');
+
+  expect(validResult).toBeTruthy();
+  expect(invalidResult).toBeFalsy();
+});

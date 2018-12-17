@@ -71,6 +71,18 @@ async function fetchVideos(videosPerPage = appConfig.maxVideosToLoad, previousPa
 }
 
 export class YoutubeService {
+
+  async isValidVideo(videoId) {
+    const params = {
+      part: 'id',
+      id: videoId,
+      key: appConfig.youtubeApiKey
+    };
+    const result = await youtubeClient.get('/videos', {params});
+
+    return result.data.items.length === 1;
+  }
+
   async fetchNextPage(videosPerPage = appConfig.maxVideosToLoad, nextPageToken) {
     return await fetchVideosPage(videosPerPage, nextPageToken);
   }

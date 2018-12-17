@@ -1,6 +1,5 @@
 /* eslint-disable */
 import React, { Component } from 'react';
-import Axios from 'axios';
 import MovieIcon from '@material-ui/icons/Movie';
 import AvTimerIcon from '@material-ui/icons/AvTimer';
 import VisibilityIcon from '@material-ui/icons/Visibility';

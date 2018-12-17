@@ -2,6 +2,13 @@ export class MockYoutubeService {
 
   mock = {}
 
+  isValidVideo(returnValue) {
+    this.mock.isValidVideo = () => new Promise((resolve, reject) =>
+      resolve(returnValue)
+    );
+    return this;
+  }
+
   fetchNextPage(returnValue) {
     this.mock.fetchNextPage = () => new Promise((resolve, reject) =>
       resolve(returnValue)
