@@ -32,10 +32,10 @@ it('renders without crashing', () => {
 it('opens video in new window', () => {
   const div = document.createElement('div');
 
-  global.open = jest.fn();
+  global.location.replace = jest.fn();
   const youtube = ReactDOM.render(<Youtube services={services} config={config} onChanges={onChanges} setTitle={setTitle} />, div);
   youtube.openVideo("video-id");
-  expect(global.open).toBeCalledWith("//www.youtube.com/watch?v=video-id");
+  expect(global.location.replace).toBeCalledWith("/youtube/video-id");
   ReactDOM.unmountComponentAtNode(div);
 });
 

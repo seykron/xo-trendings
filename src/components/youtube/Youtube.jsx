@@ -85,7 +85,7 @@ class Youtube extends Component {
   }
 
   openVideo(videoId) {
-    return window.open('//www.youtube.com/watch?v=' + videoId);
+    return window.location.replace('/youtube/' + videoId);
   }
 
   youtubeCard() {
