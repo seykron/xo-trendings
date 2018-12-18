@@ -6,10 +6,11 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import WarningIcon from '@material-ui/icons/Warning';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router'
 
 import './Youtube.scss';
 
-class Youtube extends Component {
+export class Youtube extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -84,13 +85,13 @@ class Youtube extends Component {
   }
 
   openVideo(videoId) {
-    return window.location.replace('/youtube/' + videoId);
+    return this.props.history.push('/youtube/' + videoId);
   }
 
   youtubeCard() {
     return this.state.trends.map((video, index) =>
       <div key={index} className="card-container">
-        <div className="card" onClick={this.openVideo.bind(this, [video.id])}>
+        <div className="card" onClick={() => this.openVideo(video.id)}>
           <div className="img-container">
             <img src={video.thumbnail} alt={video.title}/>
             <MovieIcon/>
@@ -139,4 +140,4 @@ Youtube.propTypes = {
   onChanges: PropTypes.func
 };
 
-export default Youtube;
+export default withRouter(Youtube);

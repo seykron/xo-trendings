@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Youtube from './Youtube';
+import { Youtube } from './Youtube';
 import { MockYoutubeService } from '../../../test/src/mock/MockYoutubeService.test';
 
 const config = {};
@@ -31,11 +31,13 @@ it('renders without crashing', () => {
 
 it('opens video in new window', () => {
   const div = document.createElement('div');
+  const history = {
+    push: jest.fn()
+  };
+  const youtube = ReactDOM.render(<Youtube history={history} services={services} config={config} onChanges={onChanges} setTitle={setTitle} />, div);
 
-  global.location.replace = jest.fn();
-  const youtube = ReactDOM.render(<Youtube services={services} config={config} onChanges={onChanges} setTitle={setTitle} />, div);
   youtube.openVideo("video-id");
-  expect(global.location.replace).toBeCalledWith("/youtube/video-id");
+  expect(youtube.props.history.push).toBeCalledWith("/youtube/video-id");
   ReactDOM.unmountComponentAtNode(div);
 });
 

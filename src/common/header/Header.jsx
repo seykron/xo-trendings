@@ -7,11 +7,13 @@ import PropTypes from 'prop-types';
 import './Header.scss';
 import Logo from '../../../public/logo.svg';
 import SlideFilters from '../slide-filters/SlideFilters';
+import { withRouter } from 'react-router';
 
-class Header extends Component {
+export class Header extends Component {
   state = {
     drawerIsOpened: false,
-    title: ''
+    title: '',
+    showFilters: true
   };
 
   constructor(props) {
@@ -21,10 +23,42 @@ class Header extends Component {
     }, 100);
   }
 
+  /** Registers event listener to detect changes in the router in order to
+   * hide filters on video player view.
+   */
+  componentDidMount() {
+    this.props.history.listen((location, action) => {
+      const showFilters = location.pathname.endsWith('/youtube');
+      this.toggleFilters(showFilters);
+    });
+  }
+
+  /** Shows or hides video filters.
+   * @param {Boolean} show true to display filters, false otherwise.
+   */
+  toggleFilters(show) {
+    this.setState({
+      showFilters: show
+    });
+  }
+
   toggleDrawer(open) {
     this.setState({
       drawerIsOpened: open
     });
+  }
+
+  /** Renders the filters button only if it must be available. It
+   * is hidden on video player view.
+   */
+  renderFiltersIfRequired() {
+    if (this.state.showFilters) {
+      return (
+        <Button className="menu-toggle" onClick={ () => this.toggleDrawer(true) }>
+          <SettingsIcon aria-label="Settings"/>
+        </Button>
+      );
+    }
   }
 
   render() {
@@ -37,15 +71,19 @@ class Header extends Component {
           <div className="opened-module-title">
             {this.state.title}
           </div>
-          <Button className="menu-toggle" onClick={this.toggleDrawer.bind(this, true)}>
-            <SettingsIcon aria-label="Settings"/>
-          </Button>
+          {
+            this.renderFiltersIfRequired()
+          }
         </nav>
         <Drawer
           anchor="right"
           open={this.state.drawerIsOpened}
           onClose={this.toggleDrawer.bind(this, false)}>
-            <SlideFilters services={this.props.services} close={this.toggleDrawer.bind(this, false)} config={this.props.config} onChanges={this.props.onChanges}/>
+            <SlideFilters
+              services={this.props.services}
+              close={() => this.toggleDrawer(false) }
+              config={this.props.config}
+              onChanges={this.props.onChanges}/>
         </Drawer>
       </div>
     );
@@ -56,7 +94,8 @@ Header.propTypes = {
   setTitle: PropTypes.func,
   config: PropTypes.object,
   onChanges: PropTypes.func,
-  services : PropTypes.object
+  services : PropTypes.object,
+  history: PropTypes.object
 };
 
-export default Header;
+export default withRouter(Header);
