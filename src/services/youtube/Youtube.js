@@ -1,14 +1,17 @@
 import Axios from 'axios';
-import {appConfig} from '../../config';
-import {VideoClass} from '../../models/video.class';
-import {CategoryClass} from '../../models/category.class';
+import { appConfig } from '../../config';
+import { VideoClass } from '../../models/video.class';
+import { CategoryClass } from '../../models/category.class';
+import { VideoListPage } from '../../models/VideoListPage';
 import { isNullOrUndefined } from 'util';
 
 const youtubeClient = Axios.create({
   baseURL: appConfig.youtubeEndPoint
 });
 
+/** Max number of videos per page allowed by Youtube Data API. */
 const MAX_VIDEOS_PER_PAGE = 50;
+/** Determines the video properties to return from the Youtube Data API. */
 const CATEGORIES_PART = 'snippet';
 
 function createListParams(videosPerPage = appConfig.maxVideosToLoad,
@@ -34,18 +37,19 @@ async function fetchVideosPage(videosPerPage = appConfig.maxVideosToLoad, pageTo
   const params = createListParams(videosPerPage, pageToken);
   const result = await youtubeClient.get('/videos', {params});
   const nextPageToken = result.data.nextPageToken;
-  return {
-    videos: result.data.items.map(item =>
+
+  return new VideoListPage(
+    result.data.items.map(item =>
       new VideoClass(item)
     ),
-    nextPageToken: nextPageToken
-  };
+    nextPageToken
+  );
 }
 
 /** Gets most popular videos from the Youtube data API.
  *
  * @param {Number} videosPerPage Number of videos per page.
- * @param {Object} [previousPage] Previous page.
+ * @param {VideoListPage} [previousPage] Previous page.
  * @param {String} videosPage.nextPageToken A page token to fetch the next page, used for pagination, should
  * not be used from outside this function.
  * @param {VideoClass[]} videosPage.videos List of already resolved videos. Used for pagination, should
@@ -57,21 +61,24 @@ async function fetchVideos(videosPerPage = appConfig.maxVideosToLoad, previousPa
 
   if (nextVideos.length < videosPerPage && !isNullOrUndefined(nextPage.nextPageToken)) {
     return await fetchVideos(
-      videosPerPage, {
-        videos: nextVideos,
-        nextPageToken: nextPage.nextPageToken
-      }
+      videosPerPage,
+      new VideoListPage(nextVideos, nextPage.nextPageToken)
     );
   } else {
-    return {
-      videos: nextVideos.slice(0, videosPerPage),
-      nextPageToken: nextPage.nextPageToken
-    };
+    return new VideoListPage(
+      nextVideos.slice(0, videosPerPage),
+      nextPage.nextPageToken
+    );
   }
 }
 
 export class YoutubeService {
 
+  /** Determines whether a video id is a valid youtube video.
+   *
+   * @param {String} videoId Youtube id of the video to validate.
+   * @returns true if the video id is a valid youtube video, false otherwise.
+   */
   async isValidVideo(videoId) {
     const params = {
       part: 'id',
@@ -83,10 +90,19 @@ export class YoutubeService {
     return result.data.items.length === 1;
   }
 
+  /** Retrieves the next page from a previous video listing operation.
+   *
+   * @param {Number} videosPerPage Amount of videos per page, used for pagination.
+   * @param {String} nextPageToken Token to retrieve the next page.
+   */
   async fetchNextPage(videosPerPage = appConfig.maxVideosToLoad, nextPageToken) {
     return await fetchVideosPage(videosPerPage, nextPageToken);
   }
 
+  /** Returns a list of trending videos.
+   *
+   * @param {Number} videosPerPage Amount of videos per page, used for pagination.
+   */
   async getTrendingVideos(videosPerPage = appConfig.maxVideosToLoad) {
     return await fetchVideos(videosPerPage);
   }

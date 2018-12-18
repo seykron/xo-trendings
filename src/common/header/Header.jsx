@@ -9,7 +9,14 @@ import Logo from '../../../public/logo.svg';
 import SlideFilters from '../slide-filters/SlideFilters';
 import { withRouter } from 'react-router';
 
+/** Represents the application header.
+ *
+ * It manages the visibility of video filters.
+ */
 export class Header extends Component {
+
+  /** Initial component state.
+   */
   state = {
     drawerIsOpened: false,
     title: '',
@@ -18,6 +25,8 @@ export class Header extends Component {
 
   constructor(props) {
     super(props);
+    this.history = this.props.history;
+
     setTimeout(() => {
       this.setState({title : this.props.setTitle()});
     }, 100);
@@ -27,7 +36,7 @@ export class Header extends Component {
    * hide filters on video player view.
    */
   componentDidMount() {
-    this.props.history.listen((location, action) => {
+    this.history.listen((location, action) => {
       const showFilters = location.pathname.endsWith('/youtube');
       this.toggleFilters(showFilters);
     });
@@ -42,6 +51,9 @@ export class Header extends Component {
     });
   }
 
+  /** Displays or closes the video filters.
+   * @param {Boolean} open true to display the video filters, false otherwise.
+   */
   toggleDrawer(open) {
     this.setState({
       drawerIsOpened: open
